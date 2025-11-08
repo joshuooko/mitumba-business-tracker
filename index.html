@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4F46E5">
+    <meta name="description" content="Offline business tracker for mitumba shops">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <title>Mitumba Tracker</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 8px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            color: #1a202c;
+        }
+        
+        .offline-badge {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .online-badge {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: #e5e7eb;
+            color: #4b5563;
+            font-weight: 600;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            min-width: 100px;
+            white-space: nowrap;
+        }
+        
+        .tab.active {
+            background: #4f46e5;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+        }
+        
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .summary-card h3 {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+        
+        .summary-card p {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .record-item {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid #4f46e5;
+        }
+        
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .record-actions {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .install-prompt {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+            color: #1e40af;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        
+        .install-prompt button {
+            margin-top: 8px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Install Prompt -->
+        <div id="installPrompt" class="install-prompt hidden">
+            <p><strong>📱 Install Mitumba Tracker</strong></p>
+            <p>Add to your home screen for offline use!</p>
+            <button onclick="installApp()">Install Now</button>
+        </div>
+        
+        <!-- Header -->
+        <div class="card">
+            <div class="header">
+                <div>
+                    <h1>Mitumba Tracker</h1>
+                    <p style="font-size: 12px; color: #6b7280;">Purchases → Sales → Profit</p>
+                </div>
+                <div>
+                    <span id="onlineStatus" class="online-badge">● Online</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="currentDate" value="">
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('sales')">💰 Sales</button>
+            <button class="tab" onclick="switchTab('purchases')">🛒 Purchases</button>
+            <button class="tab" onclick="switchTab('expenses')">📝 Expenses</button>
+            <button class="tab" onclick="switchTab('summary')">📊 Summary</button>
+        </div>
+        
+        <!-- Sales Tab -->
+        <div id="sales" class="tab-content active">
+            <div class="card">
+                <h2 style="margin-bottom: 12px;">Today's Sales</h2>
+                <div id="salesList"></div>
+                <button class="btn btn-success" onclick="addSale()">+ Add Sale</button>
+            </div>
+        </div>
+        
+        <!-- Purchases Tab -->
+        <div id="purchases" class="tab-content">
+            <div class="card">
+                <h2 style="margin-bottom: 12px;">Stock Purchases</h2>
+                <div id="purchasesList"></div>
+                <button class="btn btn-primary" onclick="addPurchase()">+ Add Purchase</button>
+            </div>
+        </div>
+        
+        <!-- Expenses Tab -->
+        <div id="expenses" class="tab-content">
+            <div class="card">
+                <h2 style="margin-bottom: 12px;">Expenses</h2>
+                <div id="expensesList"></div>
+                <button class="btn btn-danger" onclick="addExpense()">+ Add Expense</button>
+            </div>
+        </div>
+        
+        <!-- Summary Tab -->
+        <div id="summary" class="tab-content">
+            <div class="card">
+                <h2 style="margin-bottom: 16px;">Daily Summary</h2>
+                <div class="grid">
+                    <div class="summary-card">
+                        <h3>Sales</h3>
+                        <p id="totalSales">Ksh 0</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Purchases</h3>
+                        <p id="totalPurchases">Ksh 0</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Expenses</h3>
+                        <p id="totalExpenses">Ksh 0</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Net Cash</h3>
+                        <p id="netCash">Ksh 0</p>
+                    </div>
+                </div>
+                
+                <button class="btn btn-success" onclick="saveRecord()">💾 Save Today's Record</button>
+                <button class="btn btn-secondary" onclick="viewHistory()">📚 View History</button>
+                <button class="btn btn-secondary" onclick="exportData()">📥 Export All Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App Data
+        let data = {
+            sales: [],
+            purchases: [],
+            expenses: [],
+            records: []
+        };
+        
+        // PWA Install Prompt
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').classList.remove('hidden');
+        });
+        
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('installPrompt').classList.add('hidden');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+        
+        // Online/Offline Status
+        function updateOnlineStatus() {
+            const status = document.getElementById('onlineStatus');
+            if (navigator.onLine) {
+                status.className = 'online-badge';
+                status.textContent = '● Online';
+            } else {
+                status.className = 'offline-badge';
+                status.textContent = '● Offline';
+            }
+        }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        
+        // Load Data from LocalStorage
+        function loadData() {
+            const stored = localStorage.getItem('mtumbaData');
+            if (stored) {
+                data = JSON.parse(stored);
+            }
+            render();
+        }
+        
+        // Save Data to LocalStorage
+        function saveData() {
+            localStorage.setItem('mtumbaData', JSON.stringify(data));
+        }
+        
+        // Initialize
+        document.getElementById('currentDate').valueAsDate = new Date();
+        loadData();
+        updateOnlineStatus();
+        
+        // Tab Switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            updateSummary();
+        }
+        
+        // Add Sale
+        function addSale() {
+            const sale = {
+                id: Date.now(),
+                item: prompt('Item (Shoes/Clothes):') || 'Shoes',
+                quantity: parseFloat(prompt('Quantity:') || 1),
+                price: parseFloat(prompt('Sell Price (Ksh):') || 0),
+                cost: parseFloat(prompt('Cost Price (Ksh):') || 0)
+            };
+            sale.total = sale.quantity * sale.price;
+            sale.profit = (sale.price - sale.cost) * sale.quantity;
+            data.sales.push(sale);
+            saveData();
+            render();
+        }
+        
+        // Add Purchase
+        function addPurchase() {
+            const purchase = {
+                id: Date.now(),
+                item: prompt('Item (Shoes/Clothes):') || 'Clothes',
+                quantity: parseFloat(prompt('Quantity:') || 1),
+                cost: parseFloat(prompt('Cost (Ksh):') || 0)
+            };
+            purchase.total = purchase.quantity * purchase.cost;
+            data.purchases.push(purchase);
+            saveData();
+            render();
+        }
+        
+        // Add Expense
+        function addExpense() {
+            const expense = {
+                id: Date.now(),
+                description: prompt('Description:') || 'Expense',
+                amount: parseFloat(prompt('Amount (Ksh):') || 0)
+            };
+            data.expenses.push(expense);
+            saveData();
+            render();
+        }
+        
+        // Delete Item
+        function deleteItem(type, id) {
+            if (confirm('Delete this item?')) {
+                data[type] = data[type].filter(item => item.id !== id);
+                saveData();
+                render();
+            }
+        }
+        
+        // Render Lists
+        function render() {
+            // Sales
+            const salesList = document.getElementById('salesList');
+            salesList.innerHTML = data.sales.length === 0 ? '<p style="color: #9ca3af;">No sales yet</p>' : '';
+            data.sales.forEach(sale => {
+                salesList.innerHTML += `
+                    <div class="record-item">
+                        <div class="record-header">
+                            <strong>${sale.item} x${sale.quantity}</strong>
+                            <button class="btn btn-danger btn-sm" onclick="deleteItem('sales', ${sale.id})">×</button>
+                        </div>
+                        <p>Price: Ksh ${sale.price} | Total: Ksh ${sale.total} | Profit: Ksh ${sale.profit}</p>
+                    </div>
+                `;
+            });
+            
+            // Purchases
+            const purchasesList = document.getElementById('purchasesList');
+            purchasesList.innerHTML = data.purchases.length === 0 ? '<p style="color: #9ca3af;">No purchases yet</p>' : '';
+            data.purchases.forEach(purchase => {
+                purchasesList.innerHTML += `
+                    <div class="record-item">
+                        <div class="record-header">
+                            <strong>${purchase.item} x${purchase.quantity}</strong>
+                            <button class="btn btn-danger btn-sm" onclick="deleteItem('purchases', ${purchase.id})">×</button>
+                        </div>
+                        <p>Cost: Ksh ${purchase.cost} | Total: Ksh ${purchase.total}</p>
+                    </div>
+                `;
+            });
+            
+            // Expenses
+            const expensesList = document.getElementById('expensesList');
+            expensesList.innerHTML = data.expenses.length === 0 ? '<p style="color: #9ca3af;">No expenses yet</p>' : '';
+            data.expenses.forEach(expense => {
+                expensesList.innerHTML += `
+                    <div class="record-item">
+                        <div class="record-header">
+                            <strong>${expense.description}</strong>
+                            <button class="btn btn-danger btn-sm" onclick="deleteItem('expenses', ${expense.id})">×</button>
+                        </div>
+                        <p>Amount: Ksh ${expense.amount}</p>
+                    </div>
+                `;
+            });
+            
+            updateSummary();
+        }
+        
+        // Update Summary
+        function updateSummary() {
+            const totalSales = data.sales.reduce((sum, s) => sum + s.total, 0);
+            const totalPurchases = data.purchases.reduce((sum, p) => sum + p.total, 0);
+            const totalExpenses = data.expenses.reduce((sum, e) => sum + e.amount, 0);
+            const netCash = totalSales - totalPurchases - totalExpenses;
+            
+            document.getElementById('totalSales').textContent = `Ksh ${totalSales}`;
+            document.getElementById('totalPurchases').textContent = `Ksh ${totalPurchases}`;
+            document.getElementById('totalExpenses').textContent = `Ksh ${totalExpenses}`;
+            document.getElementById('netCash').textContent = `Ksh ${netCash}`;
+        }
+        
+        // Save Record
+        function saveRecord() {
+            const date = document.getElementById('currentDate').value;
+            if (!date) {
+                alert('Please select a date');
+                return;
+            }
+            
+            const record = {
+                date,
+                sales: [...data.sales],
+                purchases: [...data.purchases],
+                expenses: [...data.expenses],
+                timestamp: Date.now()
+            };
+            
+            data.records.push(record);
+            data.sales = [];
+            data.purchases = [];
+            data.expenses = [];
+            saveData();
+            render();
+            alert('Record saved! ✅');
+        }
+        
+        // View History
+        function viewHistory() {
+            if (data.records.length === 0) {
+                alert('No records saved yet');
+                return;
+            }
+            
+            let html = '<div class="card"><h2>Saved Records</h2>';
+            data.records.reverse().forEach((record, index) => {
+                const totalSales = record.sales.reduce((sum, s) => sum + s.total, 0);
+                const totalPurchases = record.purchases.reduce((sum, p) => sum + p.total, 0);
+                const totalExpenses = record.expenses.reduce((sum, e) => sum + e.amount, 0);
+                const netCash = totalSales - totalPurchases - totalExpenses;
+                
+                html += `
+                    <div class="record-item">
+                        <div class="record-header">
+                            <strong>${record.date}</strong>
+                            <button class="btn btn-danger btn-sm" onclick="deleteRecord(${data.records.length - 1 - index})">Delete</button>
+                        </div>
+                        <p>Sales: Ksh ${totalSales} | Purchases: Ksh ${totalPurchases}</p>
+                        <p>Expenses: Ksh ${totalExpenses} | Net: Ksh ${netCash}</p>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            document.getElementById('summary').innerHTML = html + document.getElementById('summary').innerHTML;
+        }
+        
+        // Delete Record
+        function deleteRecord(index) {
+            if (confirm('Delete this record?')) {
+                data.records.splice(index, 1);
+                saveData();
+                viewHistory();
+            }
+        }
+        
+        // Export Data
+        function exportData() {
+            let text = '=== MITUMBA TRACKER - ALL RECORDS ===\n\n';
+            
+            data.records.forEach(record => {
+                text += `DATE: ${record.date}\n`;
+                text += '=====================================\n\n';
+                
+                text += 'SALES:\n';
+                record.sales.forEach(s => {
+                    text += `  ${s.item} x${s.quantity} @ Ksh ${s.price} = Ksh ${s.total} (Profit: Ksh ${s.profit})\n`;
+                });
+                
+                text += '\nPURCHASES:\n';
+                record.purchases.forEach(p => {
+                    text += `  ${p.item} x${p.quantity} @ Ksh ${p.cost} = Ksh ${p.total}\n`;
+                });
+                
+                text += '\nEXPENSES:\n';
+                record.expenses.forEach(e => {
+                    text += `  ${e.description}: Ksh ${e.amount}\n`;
+                });
+                
+                text += '\n=====================================\n\n';
+            });
+            
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `mitumba-records-${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed'));
+            });
+        }
+    </script>
+</body>
+</html>
